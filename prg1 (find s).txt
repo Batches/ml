@@ -1,7 +1,6 @@
 import pandas as pd
 import numpy as np
 data = pd.read_csv('C:/Users/Students/Desktop/trainingexamples.csv')
-ass = data
 features = np.array(data)[:,:-1]
 print("features in the database:\n",features)
 target = np.array(data)[:,-1]
