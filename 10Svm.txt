@@ -1,76 +1,36 @@
 import numpy as np
 import matplotlib.pyplot as plt
-import pandas as pd
-
-df = pd.read_csv('Downloads/Social_Network_Ads.csv')
-
-X = df.iloc[:, [2,3]]
-y = df.iloc[:, 4]
-
+from sklearn.datasets import load_iris
 from sklearn.model_selection import train_test_split
-X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=0)
-
-print("Training data : ", X_train.shape)
-print("Testing data : ", X_test.shape)
-
-from sklearn.preprocessing import StandardScaler
-sc_X = StandardScaler()
-X_train = sc_X.fit_transform(X_train)
-X_test = sc_X.fit_transform(X_test)
-
 from sklearn.svm import SVC
-classifier = SVC(kernel='linear', random_state=0)
-classifier.fit(X_train, y_train)
-y_pred = classifier.predict(X_test)
 
-from sklearn import metrics
-print("Accuracy Score : with linear kernel")
-print(metrics.accuracy_score(y_test, y_pred))
+# Load the Iris dataset
+iris = load_iris()
+X = iris.data[:, :2]  # Use only the first two features
+y = iris.target
 
+# Split the dataset into training and testing sets
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
 
-classifier = SVC(kernel='rbf')
-classifier.fit(X_train, y_train)
-y_pred = classifier.predict(X_test)
-print("Accuracy Score : with default rbf kernel")
-print(metrics.accuracy_score(y_test, y_pred))
+# Train the SVM classifier
+svm_classifier = SVC(kernel='linear', random_state=42)
+svm_classifier.fit(X_train, y_train)
 
-classifier = SVC(kernel='rbf', gamma=15, C=7, random_state=0)
-classifier.fit(X_train, y_train)
-y_pred = classifier.predict(X_test)
-print("Accuracy Score On test data : with default rbf kernel")
-print(metrics.accuracy_score(y_test, y_pred))
+# Evaluate the classifier
+score = svm_classifier.score(X_test, y_test)
+print("Classification Score (Accuracy):", score)
 
-svc = SVC(kernel='poly', degree=4)
-svc.fit(X_train, y_train)
-y_pred = svc.predict(X_test)
-print("Accuracy Score : with poly kernel and degree")
-print(metrics.accuracy_score(y_test, y_pred))
+# Plot the decision boundaries
+x_min, x_max = X[:, 0].min() - 1, X[:, 0].max() + 1
+y_min, y_max = X[:, 1].min() - 1, X[:, 1].max() + 1
+xx, yy = np.meshgrid(np.arange(x_min, x_max, 0.01), np.arange(y_min, y_max, 0.01))
 
-import matplotlib.pyplot as plt
-plt.scatter(X_train[:, 0], X_train[:, 1], c=y_train)
-plt.xlabel('Age')
-plt.ylabel('Estimated Salary')
-plt.title('Training Data')
+Z = svm_classifier.predict(np.c_[xx.ravel(), yy.ravel()])
+Z = Z.reshape(xx.shape)
+
+plt.contourf(xx, yy, Z, alpha=0.4)
+plt.scatter(X[:, 0], X[:, 1], c=y, s=20, edgecolor='k')
+plt.xlabel('Sepal Length')
+plt.ylabel('Sepal Width')
+plt.title('SVM Decision Boundaries')
 plt.show()
-
-plt.scatter(X_test[:, 0], X_test[:, 1], c=y_test)
-plt.xlabel('Age')
-plt.ylabel('Estimated Salary')
-plt.title('Test Data')
-plt.show()
-
-classifier = SVC(kernel='linear', random_state=0)
-classifier.fit(X_train, y_train)
-y_pred = classifier.predict(X_test)
-
-plt.scatter(X_test[:, 0], X_test[:, 1], c=y_test)
-plt.scatter(X_train[:, 0], X_train[:, 1], c=y_train)
-
-w = classifier.coef_[0]
-a = -w[0]/w[1]
-xx = np.linspace(-2.5, 2.5)
-yy = a * xx -(classifier.intercept_[0])/w[1]
-
-plt.plot(xx,yy)
-plt.axis("off")
-plt.show();
